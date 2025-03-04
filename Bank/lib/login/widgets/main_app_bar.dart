@@ -45,11 +45,15 @@ class MainAppBar extends StatelessWidget {
               children: [
                 Text("Good afternoon",
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w400)),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16)),
                 Text(
                   "AHMAD ISSA",
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18),
                 )
               ],
             ),
