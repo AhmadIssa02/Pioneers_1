@@ -4,13 +4,19 @@ import 'package:new_app/model/item_model.dart';
 class ReceiptBottomSheet extends StatefulWidget {
   final List<ItemModel> itemsList;
   const ReceiptBottomSheet({super.key, required this.itemsList});
-
   @override
   State<ReceiptBottomSheet> createState() => _ReceiptBottomSheetState();
 }
 
 class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
-  double total = 0;
+  double calculateTotal() {
+    double total = 0;
+    for (int i = 0; i < widget.itemsList.length; i++) {
+      total += widget.itemsList[i].price * widget.itemsList[i].quantity;
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -46,9 +52,6 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
           child: ListView.builder(
               itemCount: widget.itemsList.length,
               itemBuilder: (ctx, index) {
-                total += (widget.itemsList[index].price *
-                    widget.itemsList[index].quantity);
-
                 //TODO SETSTATE HERE WILL CREATE AN ERROR
                 return Container(
                   color: Colors.white38,
@@ -80,7 +83,7 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
         ),
         Container(
           color: Colors.white38,
-          child: Text("total price $total"),
+          child: Text("total price ${calculateTotal()}"),
         )
       ],
     );
