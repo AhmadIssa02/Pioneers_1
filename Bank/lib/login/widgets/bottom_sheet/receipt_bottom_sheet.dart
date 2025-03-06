@@ -3,7 +3,9 @@ import 'package:new_app/model/item_model.dart';
 
 class ReceiptBottomSheet extends StatefulWidget {
   final List<ItemModel> itemsList;
-  const ReceiptBottomSheet({super.key, required this.itemsList});
+  final Function(ItemModel) onDelete;
+  const ReceiptBottomSheet(
+      {super.key, required this.itemsList, required this.onDelete});
   @override
   State<ReceiptBottomSheet> createState() => _ReceiptBottomSheetState();
 }
@@ -68,6 +70,7 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
                       Expanded(child: SizedBox()),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 5,
+                        //TODO + - (and at 0 delete ) use callback
                         child: Text("${widget.itemsList[index].quantity}"),
                       ),
                       Expanded(child: SizedBox()),
@@ -76,6 +79,18 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
                         child: Text(
                             "${widget.itemsList[index].price * widget.itemsList[index].price}"),
                       ),
+                      Expanded(child: SizedBox()),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 5,
+                        child: IconButton(
+                          onPressed: () {
+                            widget.onDelete(widget.itemsList[index]);
+                            widget.itemsList.removeAt(index);
+                            setState(() {});
+                          },
+                          icon: Icon(Icons.delete),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -83,7 +98,7 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
         ),
         Container(
           color: Colors.white38,
-          child: Text("total price ${calculateTotal()}"),
+          child: Text("total price ${calculateTotal()} JD"),
         )
       ],
     );
