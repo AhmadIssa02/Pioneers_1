@@ -65,14 +65,29 @@ class _CapitalMartViewState extends State<CapitalMartView> {
                     context: context,
                     builder: (context) {
                       return ReceiptBottomSheet(
-                          itemsList: newList,
-                          onDelete: (item) {
-                            for (int i = 0; i < itemsList.length; i++) {
-                              if (itemsList[i].name == item.name) {
-                                itemsList[i].quantity = 0;
-                              }
+                        itemsList: newList,
+                        onDelete: (item) {
+                          for (int i = 0; i < itemsList.length; i++) {
+                            if (itemsList[i].name == item.name) {
+                              itemsList[i].quantity = 0;
                             }
-                          });
+                          }
+                        },
+                        onRemove: (item) {
+                          for (int i = 0; i < itemsList.length; i++) {
+                            if (itemsList[i].name == item.name) {
+                              itemsList[i].quantity--;
+                            }
+                          }
+                        },
+                        onAdd: (item) {
+                          for (int i = 0; i < itemsList.length; i++) {
+                            if (itemsList[i].name == item.name) {
+                              itemsList[i].quantity++;
+                            }
+                          }
+                        },
+                      );
                     },
                   ).then((c) {
                     setState(() {});
