@@ -11,7 +11,6 @@ class CapitalMartView extends StatefulWidget {
 }
 
 class _CapitalMartViewState extends State<CapitalMartView> {
-  // static const List<String> itemsList = ["1", "2", "3", "4"];
   static List<ItemModel> itemsList = [
     ItemModel(
         image:
