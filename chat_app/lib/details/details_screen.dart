@@ -1,3 +1,4 @@
+import 'package:chat_app/details/widgets/chat_tile.dart';
 import 'package:chat_app/mainScreen/main_bloc.dart';
 import 'package:chat_app/models/chat.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool isDark = false;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: isDark ? Colors.black : Colors.white,
       appBar: AppBar(
         title: Row(
           children: [
@@ -47,67 +50,54 @@ class _DetailsScreenState extends State<DetailsScreen> {
             Text(widget.details.name),
           ],
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                isDark = !isDark;
+                setState(() {});
+              },
+              icon: const Icon(Icons.dark_mode))
+        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              controller: _scrollController, // Attach ScrollController
+              controller: _scrollController,
               itemCount: widget.details.chatConv.length,
               itemBuilder: (ctx, index) {
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: widget.details.chatConv[index].isSender
-                      ? Row(
-                          children: [
-                            const Spacer(),
-                            Container(
-                              height: 30,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: Colors.blueGrey[400]),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: Text(
-                                  widget.details.chatConv[index].text,
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Container(
-                              height: 30,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: Colors.blueGrey[400]),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: Text(
-                                  widget.details.chatConv[index].text,
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                          ],
-                        ),
-                );
+                    padding: const EdgeInsets.all(8.0),
+                    child: ChatTile(
+                      isSender: widget.details.chatConv[index].isSender,
+                      text: widget.details.chatConv[index].text,
+                    ));
               },
             ),
           ),
           Container(
-            color: Colors.pink,
+            color: Colors.blueGrey,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
+                      onSubmitted: (value) => {
+                        if (controller.text.trim().isNotEmpty)
+                          {
+                            widget.details.chatConv.add(ChatConv(
+                              date: MainBloc().getCurrentDateTime(),
+                              text: controller.text,
+                              isSender: true,
+                            )),
+                            widget.onUpdate(),
+                            setState(() {}),
+                            controller.clear(),
+                            Future.delayed(
+                                Duration(milliseconds: 100), _scrollToBottom),
+                          }
+                      },
                       controller: controller,
                       decoration:
                           InputDecoration(hintText: "Type a message..."),
