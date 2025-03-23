@@ -1,1 +1,3 @@
-class DetailsBloc {}
+class DetailsBloc {
+  //
+}
