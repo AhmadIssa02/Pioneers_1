@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'dart:js_interop';
+import 'dart:typed_data';
 import 'package:chat_app/details/widgets/chat_tile.dart';
 import 'package:chat_app/mainScreen/main_bloc.dart';
 import 'package:chat_app/models/chat.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 
 class DetailsScreen extends StatefulWidget {
   final Chat details;
@@ -17,6 +22,44 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isDark = false;
+  // final ImagePicker _picker = ImagePicker();
+  // File? _image;
+
+  // Future<void> _pickImage() async {
+  //   print("test");
+  //   final XFile? pickedFile =
+  //       await _picker.pickImage(source: ImageSource.gallery);
+
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+
+  //     widget.details.chatConv.add(ChatConv(
+  //       date: MainBloc().getCurrentDateTime(),
+  //       text: '[Image Attached]',
+  //       isSender: true,
+  //     ));
+  //     widget.onUpdate();
+  //     setState(() {});
+  //     Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+  //   }
+  // }
+
+  Uint8List? imageBytes;
+  final ImagePicker _picker = ImagePicker();
+
+  bool flag = true;
+
+  Future<void> getImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      Uint8List pickedImageBytes = await pickedFile.readAsBytes();
+      setState(() {
+        imageBytes = pickedImageBytes;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -37,7 +80,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.white,
+      backgroundColor: isDark ? Colors.blueGrey[900] : Colors.white,
       appBar: AppBar(
         title: Row(
           children: [
@@ -69,8 +112,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ChatTile(
-                      isSender: widget.details.chatConv[index].isSender,
-                      text: widget.details.chatConv[index].text,
+                      message: widget.details.chatConv[index],
                     ));
               },
             ),
@@ -81,6 +123,28 @@ class _DetailsScreenState extends State<DetailsScreen> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
+                  if (imageBytes != null) // image preview
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            imageBytes = null; // Remove image preview
+                          });
+                        },
+                        child: Stack(
+                          children: [
+                            Image.memory(
+                              imageBytes!,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
+                            Icon(Icons.close, size: 10),
+                          ],
+                        ),
+                      ),
+                    ),
                   Expanded(
                     child: TextField(
                       onSubmitted: (value) => {
@@ -99,21 +163,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           }
                       },
                       controller: controller,
-                      decoration:
-                          InputDecoration(hintText: "Type a message..."),
+                      decoration: InputDecoration(
+                          hintText: "Type a message...",
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              getImage();
+                              // _pickImage();
+                            },
+                            icon: const Icon(
+                              Icons.attachment,
+                            ),
+                          )),
                     ),
                   ),
                   IconButton(
                     onPressed: () {
                       if (controller.text.trim().isNotEmpty) {
-                        widget.details.chatConv.add(ChatConv(
-                          date: MainBloc().getCurrentDateTime(),
-                          text: controller.text,
-                          isSender: true,
-                        ));
+                        widget.details.chatConv.add(
+                          ChatConv(
+                              date: MainBloc().getCurrentDateTime(),
+                              text: controller.text,
+                              isSender: true,
+                              image: imageBytes),
+                        );
                         widget.onUpdate();
                         setState(() {});
                         controller.clear();
+                        imageBytes = null;
                         Future.delayed(
                             Duration(milliseconds: 100), _scrollToBottom);
                       }
