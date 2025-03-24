@@ -1,28 +1,28 @@
 import 'dart:typed_data';
 
-class Chat {
+class ChatRoom {
   final String name;
   final String image;
-  final String date;
-  final List<ChatConv> chatConv;
+  //final String date;
+  final List<RoomDetails> chatConv;
 
-  Chat({
+  ChatRoom({
     required this.name,
     required this.image,
-    required this.date,
+    // required this.date,
     required this.chatConv,
   });
 }
 
-class ChatConv {
+class RoomDetails {
   final String date;
   final String text;
-  final bool isSender;
+  final int senderID;
   final Uint8List? image;
 
-  ChatConv(
+  RoomDetails(
       {required this.date,
       required this.text,
-      required this.isSender,
+      required this.senderID,
       this.image});
 }

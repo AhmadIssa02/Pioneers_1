@@ -4,7 +4,7 @@ import 'package:chat_app/models/chat.dart';
 import 'package:flutter/material.dart';
 
 class ProfileCardView extends StatefulWidget {
-  final Chat details;
+  final ChatRoom details;
   // final Function onUpdate;
   const ProfileCardView({super.key, required this.details});
 
@@ -50,7 +50,6 @@ class _ProfileCardViewState extends State<ProfileCardView> {
               ],
             ),
             Expanded(child: SizedBox()),
-            Text(widget.details.date),
           ],
         ),
       ),

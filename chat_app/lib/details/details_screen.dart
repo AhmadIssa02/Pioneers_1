@@ -2,12 +2,13 @@ import 'dart:typed_data';
 import 'package:chat_app/details/widgets/chat_tile.dart';
 import 'package:chat_app/mainScreen/main_bloc.dart';
 import 'package:chat_app/models/chat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:image_picker/image_picker.dart';
 
 class DetailsScreen extends StatefulWidget {
-  final Chat details;
+  final ChatRoom details;
   final Function() onUpdate;
   const DetailsScreen(
       {super.key, required this.details, required this.onUpdate});
@@ -20,29 +21,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isDark = false;
-  // final ImagePicker _picker = ImagePicker();
-  // File? _image;
-
-  // Future<void> _pickImage() async {
-  //   print("test");
-  //   final XFile? pickedFile =
-  //       await _picker.pickImage(source: ImageSource.gallery);
-
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _image = File(pickedFile.path);
-  //     });
-
-  //     widget.details.chatConv.add(ChatConv(
-  //       date: MainBloc().getCurrentDateTime(),
-  //       text: '[Image Attached]',
-  //       isSender: true,
-  //     ));
-  //     widget.onUpdate();
-  //     setState(() {});
-  //     Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
-  //   }
-  // }
 
   Uint8List? imageBytes;
   final ImagePicker _picker = ImagePicker();
@@ -59,10 +37,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
+  Future<void> getRoomDetails() {
+    CollectionReference room1 = FirebaseFirestore.instance.collection('room1');
+
+    return room1.get().then((QuerySnapshot snapshot) {
+      snapshot.docs.forEach((doc) {
+        print('${doc.id} => ${doc.data()}');
+      });
+    }).catchError((error) => print("Failed to fetch users: $error"));
+  }
+
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 100), _scrollToBottom);
+    getRoomDetails();
   }
 
   void _scrollToBottom() {
@@ -127,7 +116,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
-                            imageBytes = null; // Remove image preview
+                            imageBytes = null;
                           });
                         },
                         child: Stack(
@@ -148,11 +137,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       onSubmitted: (value) => {
                         if (controller.text.trim().isNotEmpty)
                           {
-                            widget.details.chatConv.add(ChatConv(
-                              date: MainBloc().getCurrentDateTime(),
-                              text: controller.text,
-                              isSender: true,
-                            )),
+                            widget.details.chatConv.add(
+                              RoomDetails(
+                                date: MainBloc().getCurrentDateTime(),
+                                text: controller.text,
+                                senderID: 1,
+                              ),
+                            ),
                             widget.onUpdate(),
                             setState(() {}),
                             controller.clear(),
@@ -178,10 +169,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     onPressed: () {
                       if (controller.text.trim().isNotEmpty) {
                         widget.details.chatConv.add(
-                          ChatConv(
+                          RoomDetails(
                               date: MainBloc().getCurrentDateTime(),
                               text: controller.text,
-                              isSender: true,
+                              senderID: 1,
                               image: imageBytes),
                         );
                         widget.onUpdate();
