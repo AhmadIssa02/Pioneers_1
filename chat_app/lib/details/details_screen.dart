@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:chat_app/details/widgets/chat_tile.dart';
 import 'package:chat_app/mainScreen/main_bloc.dart';
