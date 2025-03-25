@@ -25,7 +25,7 @@ class MainBloc {
           chatConv: [
             RoomDetails(date: "10:37", text: "first", senderID: 1),
             RoomDetails(date: "10:37", text: "ok", senderID: 1),
-            RoomDetails(date: "10:37", text: "text", senderID: 1),
+            RoomDetails(date: "10:37", text: "text", senderID: 2),
             RoomDetails(date: "10:37", text: "last", senderID: 1)
           ]),
       ChatRoom(
@@ -34,9 +34,9 @@ class MainBloc {
               'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZSUyMGltYWdlfGVufDB8fDB8fHww',
           chatConv: [
             RoomDetails(date: "10:37", text: "first", senderID: 1),
-            RoomDetails(date: "10:37", text: "ok", senderID: 1),
+            RoomDetails(date: "10:37", text: "ok", senderID: 2),
             RoomDetails(date: "10:37", text: "text", senderID: 1),
-            RoomDetails(date: "10:37", text: "ada", senderID: 1),
+            RoomDetails(date: "10:37", text: "ada", senderID: 2),
             RoomDetails(date: "10:37", text: "text", senderID: 1),
             RoomDetails(date: "10:37", text: "last", senderID: 1)
           ]),
@@ -46,7 +46,7 @@ class MainBloc {
               'https://media.istockphoto.com/id/1437816897/photo/business-woman-manager-or-human-resources-portrait-for-career-success-company-we-are-hiring.jpg?s=612x612&w=0&k=20&c=tyLvtzutRh22j9GqSGI33Z4HpIwv9vL_MZw_xOE19NQ=',
           chatConv: [
             RoomDetails(date: "10:37", text: "text", senderID: 1),
-            RoomDetails(date: "10:37", text: "ok", senderID: 1),
+            RoomDetails(date: "10:37", text: "ok", senderID: 2),
             RoomDetails(date: "10:37", text: "text", senderID: 1),
             RoomDetails(date: "10:37", text: "text", senderID: 1)
           ]),

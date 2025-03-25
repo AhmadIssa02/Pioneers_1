@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:chat_app/Services/FirestoreServices.dart';
 import 'package:chat_app/details/widgets/chat_tile.dart';
 import 'package:chat_app/mainScreen/main_bloc.dart';
 import 'package:chat_app/models/chat.dart';
@@ -64,6 +65,57 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
+  void _onSubmit() async {
+    // TODO: add actual image
+    if (controller.text.trim().isNotEmpty) {
+      widget.details.chatConv.add(
+        RoomDetails(
+            date: MainBloc().getCurrentDateTime(),
+            text: controller.text,
+            senderID: 1,
+            image: imageBytes),
+      );
+      String? roomId =
+          await FirestoreService().getDocumentIdByName(widget.details.name);
+      FirestoreService().addChatMessage(
+          roomId!,
+          RoomDetails(
+              date: MainBloc().getCurrentDateTime(),
+              text: controller.text,
+              senderID: 1,
+              image: imageBytes));
+      widget.onUpdate();
+      setState(() {});
+      controller.clear();
+      imageBytes = null;
+      Future.delayed(Duration(milliseconds: 100), _scrollToBottom);
+    }
+  }
+
+  void _onDelete(RoomDetails message) async {
+    String? roomId =
+        await FirestoreService().getDocumentIdByName(widget.details.name);
+    FirestoreService().deleteChatMessage(roomId!, message);
+    setState(() {
+      widget.details.chatConv.remove(message);
+    });
+  }
+
+  void _onUpdate(RoomDetails oldMessage, RoomDetails newMessage) async {
+    String? roomId =
+        await FirestoreService().getDocumentIdByName(widget.details.name);
+    FirestoreService().editChatMessage(roomId!, oldMessage, newMessage);
+
+    // Update the chatConv list inside setState
+    setState(() {
+      // Find the index of the old message and update it
+      int index = widget.details.chatConv.indexOf(oldMessage);
+      if (index != -1) {
+        widget.details.chatConv[index] = newMessage;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,6 +152,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: ChatTile(
                       message: widget.details.chatConv[index],
+                      onDelete: () {
+                        _onDelete(widget.details.chatConv[index]);
+                      },
+                      onUpdate: (String oldtext, String newtext) {
+                        RoomDetails oldMessage = RoomDetails(
+                            date: widget.details.chatConv[index].date,
+                            text: oldtext,
+                            senderID: 1);
+                        RoomDetails newMessage = RoomDetails(
+                            date: MainBloc().getCurrentDateTime(),
+                            text: newtext,
+                            senderID: 1);
+                        _onUpdate(oldMessage, newMessage);
+                      },
                     ));
               },
             ),
@@ -134,23 +200,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                   Expanded(
                     child: TextField(
-                      onSubmitted: (value) => {
-                        if (controller.text.trim().isNotEmpty)
-                          {
-                            widget.details.chatConv.add(
-                              RoomDetails(
-                                date: MainBloc().getCurrentDateTime(),
-                                text: controller.text,
-                                senderID: 1,
-                              ),
-                            ),
-                            widget.onUpdate(),
-                            setState(() {}),
-                            controller.clear(),
-                            Future.delayed(
-                                Duration(milliseconds: 100), _scrollToBottom),
-                          }
-                      },
+                      onSubmitted: (value) => {_onSubmit()},
                       controller: controller,
                       decoration: InputDecoration(
                           hintText: "Type a message...",
@@ -166,22 +216,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        widget.details.chatConv.add(
-                          RoomDetails(
-                              date: MainBloc().getCurrentDateTime(),
-                              text: controller.text,
-                              senderID: 1,
-                              image: imageBytes),
-                        );
-                        widget.onUpdate();
-                        setState(() {});
-                        controller.clear();
-                        imageBytes = null;
-                        Future.delayed(
-                            Duration(milliseconds: 100), _scrollToBottom);
-                      }
+                    onPressed: () async {
+                      _onSubmit();
                     },
                     icon: const Icon(Icons.send),
                   ),

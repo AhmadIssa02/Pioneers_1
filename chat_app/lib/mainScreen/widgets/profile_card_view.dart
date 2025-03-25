@@ -37,7 +37,7 @@ class _ProfileCardViewState extends State<ProfileCardView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              radius: 20.0,
+              radius: 24.0,
               backgroundImage: NetworkImage(widget.details.image),
               backgroundColor: Colors.transparent,
             ),
@@ -45,7 +45,10 @@ class _ProfileCardViewState extends State<ProfileCardView> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.details.name),
+                Text(
+                  widget.details.name,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 Text(widget.details.chatConv.last.text)
               ],
             ),
