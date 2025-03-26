@@ -10,9 +10,13 @@ import 'package:image_picker/image_picker.dart';
 
 class DetailsScreen extends StatefulWidget {
   final ChatRoom details;
+  final int nickname;
   final Function() onUpdate;
   const DetailsScreen(
-      {super.key, required this.details, required this.onUpdate});
+      {super.key,
+      required this.details,
+      required this.onUpdate,
+      required this.nickname});
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -38,77 +42,49 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  Future<void> getRoomDetails() {
-    CollectionReference room1 = FirebaseFirestore.instance.collection('room1');
-
-    return room1.get().then((QuerySnapshot snapshot) {
-      snapshot.docs.forEach((doc) {
-        print('${doc.id} => ${doc.data()}');
-      });
-    }).catchError((error) => print("Failed to fetch users: $error"));
-  }
-
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 100), _scrollToBottom);
-    getRoomDetails();
+    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
   }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     }
   }
 
-  void _onSubmit() async {
-    // TODO: add actual image
+  void _onSubmit(int senderID) async {
     if (controller.text.trim().isNotEmpty) {
-      widget.details.chatConv.add(
-        RoomDetails(
-            date: MainBloc().getCurrentDateTime(),
-            text: controller.text,
-            senderID: 1,
-            image: imageBytes),
-      );
-      String? roomId =
-          await FirestoreService().getDocumentIdByName(widget.details.name);
       FirestoreService().addChatMessage(
-          roomId!,
+          widget.details.name,
           RoomDetails(
               date: MainBloc().getCurrentDateTime(),
               text: controller.text,
-              senderID: 1,
+              senderID: senderID,
               image: imageBytes));
       widget.onUpdate();
-      setState(() {});
       controller.clear();
       imageBytes = null;
-      Future.delayed(Duration(milliseconds: 100), _scrollToBottom);
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
     }
   }
 
   void _onDelete(RoomDetails message) async {
-    String? roomId =
-        await FirestoreService().getDocumentIdByName(widget.details.name);
-    FirestoreService().deleteChatMessage(roomId!, message);
+    FirestoreService().deleteChatMessage(widget.details.name, message);
     setState(() {
       widget.details.chatConv.remove(message);
     });
   }
 
   void _onUpdate(RoomDetails oldMessage, RoomDetails newMessage) async {
-    String? roomId =
-        await FirestoreService().getDocumentIdByName(widget.details.name);
-    FirestoreService().editChatMessage(roomId!, oldMessage, newMessage);
-
-    // Update the chatConv list inside setState
+    FirestoreService()
+        .editChatMessage(widget.details.name, oldMessage, newMessage);
     setState(() {
-      // Find the index of the old message and update it
       int index = widget.details.chatConv.indexOf(oldMessage);
       if (index != -1) {
         widget.details.chatConv[index] = newMessage;
@@ -141,92 +117,127 @@ class _DetailsScreenState extends State<DetailsScreen> {
               icon: const Icon(Icons.dark_mode))
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: widget.details.chatConv.length,
-              itemBuilder: (ctx, index) {
-                return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ChatTile(
-                      message: widget.details.chatConv[index],
-                      onDelete: () {
-                        _onDelete(widget.details.chatConv[index]);
-                      },
-                      onUpdate: (String oldtext, String newtext) {
-                        RoomDetails oldMessage = RoomDetails(
-                            date: widget.details.chatConv[index].date,
-                            text: oldtext,
-                            senderID: 1);
-                        RoomDetails newMessage = RoomDetails(
-                            date: MainBloc().getCurrentDateTime(),
-                            text: newtext,
-                            senderID: 1);
-                        _onUpdate(oldMessage, newMessage);
-                      },
-                    ));
-              },
-            ),
-          ),
-          Container(
-            color: Colors.blueGrey,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  if (imageBytes != null) // image preview
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            imageBytes = null;
-                          });
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: FirestoreService().getDocumentsStream(widget.details.name),
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) return Text('${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return const Center(child: CircularProgressIndicator());
+              default:
+                _fillTheList(snapshot.data!);
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: widget.details.chatConv.length,
+                        itemBuilder: (ctx, index) {
+                          return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ChatTile(
+                                message: widget.details.chatConv[index],
+                                nickname: widget.nickname,
+                                onDelete: () {
+                                  _onDelete(widget.details.chatConv[index]);
+                                },
+                                onUpdate: (String oldtext, String newtext) {
+                                  RoomDetails oldMessage = RoomDetails(
+                                      date: widget.details.chatConv[index].date,
+                                      text: oldtext,
+                                      senderID: 1);
+                                  RoomDetails newMessage = RoomDetails(
+                                      date: MainBloc().getCurrentDateTime(),
+                                      text: newtext,
+                                      senderID: 1);
+                                  _onUpdate(oldMessage, newMessage);
+                                },
+                              ));
                         },
-                        child: Stack(
+                      ),
+                    ),
+                    Container(
+                      color: Colors.blueGrey,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
                           children: [
-                            Image.memory(
-                              imageBytes!,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
+                            if (imageBytes != null) // image preview
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      imageBytes = null;
+                                    });
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      Image.memory(
+                                        imageBytes!,
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      const Icon(Icons.close, size: 10),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            Expanded(
+                              child: TextField(
+                                onSubmitted: (value) =>
+                                    _onSubmit(widget.nickname),
+                                controller: controller,
+                                decoration: InputDecoration(
+                                    hintText: "Type a message...",
+                                    suffixIcon: IconButton(
+                                      onPressed: () {
+                                        getImage();
+                                        // _pickImage();
+                                      },
+                                      icon: const Icon(
+                                        Icons.attachment,
+                                      ),
+                                    )),
+                              ),
                             ),
-                            Icon(Icons.close, size: 10),
+                            IconButton(
+                              onPressed: () => _onSubmit(widget.nickname),
+                              icon: const Icon(Icons.send),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                  Expanded(
-                    child: TextField(
-                      onSubmitted: (value) => {_onSubmit()},
-                      controller: controller,
-                      decoration: InputDecoration(
-                          hintText: "Type a message...",
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              getImage();
-                              // _pickImage();
-                            },
-                            icon: const Icon(
-                              Icons.attachment,
-                            ),
-                          )),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      _onSubmit();
-                    },
-                    icon: const Icon(Icons.send),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+                  ],
+                );
+            }
+          }),
+    );
+  }
+
+  _fillTheList(DocumentSnapshot<Object?> snapshot) {
+    final chatConv = _mapToRoomDetailsList(snapshot['List'] as List<dynamic>?);
+    widget.details.chatConv = chatConv;
+    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+  }
+
+  List<RoomDetails> _mapToRoomDetailsList(List<dynamic>? chatList) {
+    if (chatList == null) return [];
+
+    return chatList.map((chat) => _mapToRoomDetails(chat)).toList();
+  }
+
+  RoomDetails _mapToRoomDetails(Map<String, dynamic> chat) {
+    return RoomDetails(
+      date: chat['date'] ?? '',
+      text: chat['text'] ?? '',
+      senderID: chat['senderId'] ?? 0,
+      // image: chat['image'] != null
+      //   ? Uint8List.fromList(List<int>.from(chat['image']))
+      //   : null,
     );
   }
 }

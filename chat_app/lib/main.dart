@@ -1,10 +1,20 @@
-import 'package:chat_app/mainScreen/main_screen.dart';
+import 'package:chat_app/login/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    // Replace with actual values
+    options: const FirebaseOptions(
+        apiKey: "AIzaSyANRU-GU1gsqTXwnmxF9_APiokUHa1BDpo",
+        authDomain: "chat-app-82cb7.firebaseapp.com",
+        projectId: "chat-app-82cb7",
+        storageBucket: "chat-app-82cb7.firebasestorage.app",
+        messagingSenderId: "96080305404",
+        appId: "1:96080305404:web:caa47052392eee9215cb79",
+        measurementId: "G-CHVFDB0ZRY"),
+  );
   runApp(const MyApp());
 }
 
@@ -19,7 +29,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+      home: const LoginScreen(),
     );
   }
 }

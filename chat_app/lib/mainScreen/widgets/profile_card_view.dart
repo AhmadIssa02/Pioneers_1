@@ -1,12 +1,14 @@
 import 'package:chat_app/details/details_screen.dart';
-import 'package:chat_app/mainScreen/main_bloc.dart';
 import 'package:chat_app/models/chat.dart';
 import 'package:flutter/material.dart';
 
 class ProfileCardView extends StatefulWidget {
   final ChatRoom details;
+  final int nickname;
+
   // final Function onUpdate;
-  const ProfileCardView({super.key, required this.details});
+  const ProfileCardView(
+      {super.key, required this.details, required this.nickname});
 
   @override
   State<ProfileCardView> createState() => _ProfileCardViewState();
@@ -18,21 +20,20 @@ class _ProfileCardViewState extends State<ProfileCardView> {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
       child: InkWell(
-        onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (ctx) {
-                return DetailsScreen(
-                  details: widget.details,
-                  onUpdate: () {
-                    setState(() {});
-                  },
-                );
-              },
-            ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (ctx) {
+              return DetailsScreen(
+                details: widget.details,
+                nickname: widget.nickname,
+                onUpdate: () {
+                  setState(() {});
+                },
+              );
+            },
           ),
-        },
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,18 +42,18 @@ class _ProfileCardViewState extends State<ProfileCardView> {
               backgroundImage: NetworkImage(widget.details.image),
               backgroundColor: Colors.transparent,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.details.name,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                Text(widget.details.chatConv.last.text)
               ],
             ),
-            Expanded(child: SizedBox()),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ),

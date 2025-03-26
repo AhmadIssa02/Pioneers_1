@@ -4,7 +4,7 @@ class ChatRoom {
   final String name;
   final String image;
   //final String date;
-  final List<RoomDetails> chatConv;
+  List<RoomDetails> chatConv;
 
   ChatRoom({
     required this.name,

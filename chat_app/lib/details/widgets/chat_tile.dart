@@ -5,9 +5,15 @@ import 'package:flutter/material.dart';
 class ChatTile extends StatefulWidget {
   Function? onDelete;
   Function? onUpdate;
+  final int nickname;
   final RoomDetails message;
 
-  ChatTile({super.key, required this.message, this.onDelete, this.onUpdate});
+  ChatTile(
+      {super.key,
+      required this.message,
+      this.onDelete,
+      this.onUpdate,
+      required this.nickname});
 
   @override
   _ChatTileState createState() => _ChatTileState();
@@ -67,14 +73,14 @@ class _ChatTileState extends State<ChatTile> {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: widget.message.senderID == 1
+      alignment: widget.message.senderID == widget.nickname
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: widget.message.senderID == 1
+          color: widget.message.senderID == widget.nickname
               ? Colors.blueGrey[400]
               : Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
@@ -126,14 +132,16 @@ class _ChatTileState extends State<ChatTile> {
                 ],
               ),
               Expanded(child: SizedBox()),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    isEditing = !isEditing; // Toggle the editing state
-                  });
-                },
-                child: Icon(Icons.edit),
-              ),
+              widget.message.senderID == widget.nickname
+                  ? InkWell(
+                      onTap: () {
+                        setState(() {
+                          isEditing = !isEditing; // Toggle the editing state
+                        });
+                      },
+                      child: Icon(Icons.edit),
+                    )
+                  : Container(),
               const SizedBox(
                 width: 6,
               ),
@@ -145,12 +153,14 @@ class _ChatTileState extends State<ChatTile> {
               const SizedBox(
                 width: 6,
               ),
-              InkWell(
-                onTap: () {
-                  _showDeleteConfirmationDialog(context);
-                },
-                child: Icon(Icons.delete),
-              ),
+              widget.message.senderID == widget.nickname
+                  ? InkWell(
+                      onTap: () {
+                        _showDeleteConfirmationDialog(context);
+                      },
+                      child: Icon(Icons.delete),
+                    )
+                  : Container(),
             ],
           ),
         ),
