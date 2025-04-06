@@ -39,6 +39,7 @@ class MainBloc {
       date: chat['date'] ?? '',
       text: chat['text'] ?? '',
       senderID: chat['senderId'] ?? 0,
+      messageId: chat['messageId'] ?? "0",
       // image: chat['image'] != null
       //   ? Uint8List.fromList(List<int>.from(chat['image']))
       //   : null,

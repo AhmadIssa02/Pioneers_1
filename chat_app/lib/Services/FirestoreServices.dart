@@ -35,6 +35,34 @@ class FirestoreService {
   //   }).catchError((error) => print("Failed to fetch users: $error"));
   // }
 
+  Future<List<RoomDetails>> getMessages(String roomName) async {
+    try {
+      DocumentSnapshot docSnapshot = await chats.doc(roomName).get();
+      if (docSnapshot.exists) {
+        Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+        List<dynamic> chatList = data['List'] ?? [];
+
+        return chatList.map((chat) {
+          return RoomDetails(
+            date: chat['date'] ?? '',
+            text: chat['text'] ?? '',
+            senderID: chat['senderId'] ?? 0,
+            // image: chat['image'] != null
+            //     ? Uint8List.fromList(List<int>.from(chat['image']))
+            //     : null,
+            messageId: chat['messageId'] ?? "0",
+          );
+        }).toList();
+      } else {
+        print("Chat room not found!");
+        return [];
+      }
+    } catch (error) {
+      print("Failed to fetch messages: $error");
+      return [];
+    }
+  }
+
   Future<void> addChatMessage(String roomName, RoomDetails message) {
     // TODO: add actual image
     return chats
@@ -46,6 +74,7 @@ class FirestoreService {
               'text': message.text,
               'senderId': message.senderID,
               'image': "",
+              'messageId': message.messageId
             }
           ]),
         })
@@ -64,6 +93,7 @@ class FirestoreService {
               'text': message.text,
               'senderId': message.senderID,
               'image': "",
+              'messageId': message.messageId
             }
           ]),
         })
@@ -80,14 +110,13 @@ class FirestoreService {
         List<dynamic> chatConv = data['List'];
 
         for (int i = 0; i < chatConv.length; i++) {
-          if (chatConv[i]['date'] == oldMessage.date &&
-              chatConv[i]['senderId'] == oldMessage.senderID &&
-              chatConv[i]['text'] == oldMessage.text) {
+          if (chatConv[i]['messageId'] == oldMessage.messageId) {
             chatConv[i] = {
               'date': newMessage.date,
               'text': newMessage.text,
               'senderId': newMessage.senderID,
               'image': newMessage.image ?? "",
+              'messageId': oldMessage.messageId
             };
             break;
           }

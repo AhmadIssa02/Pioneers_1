@@ -67,6 +67,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
               text: controller.text,
               senderID: senderID,
               image: imageBytes));
+      List<RoomDetails> messages =
+          await FirestoreService().getMessages(widget.details.name);
+      print("Messages: $messages");
       widget.onUpdate();
       controller.clear();
       imageBytes = null;
@@ -146,11 +149,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   RoomDetails oldMessage = RoomDetails(
                                       date: widget.details.chatConv[index].date,
                                       text: oldtext,
-                                      senderID: 1);
+                                      senderID: 1,
+                                      messageId: widget
+                                          .details.chatConv[index].messageId);
                                   RoomDetails newMessage = RoomDetails(
                                       date: MainBloc().getCurrentDateTime(),
                                       text: newtext,
-                                      senderID: 1);
+                                      senderID: 1,
+                                      messageId: widget
+                                          .details.chatConv[index].messageId);
                                   _onUpdate(oldMessage, newMessage);
                                 },
                               ));
@@ -235,6 +242,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
       date: chat['date'] ?? '',
       text: chat['text'] ?? '',
       senderID: chat['senderId'] ?? 0,
+      messageId: chat['messageId'] ?? "0",
+
       // image: chat['image'] != null
       //   ? Uint8List.fromList(List<int>.from(chat['image']))
       //   : null,

@@ -19,10 +19,18 @@ class RoomDetails {
   final String text;
   final int senderID;
   final Uint8List? image;
+  final String messageId;
 
-  RoomDetails(
-      {required this.date,
-      required this.text,
-      required this.senderID,
-      this.image});
+  RoomDetails({
+    required this.date,
+    required this.text,
+    required this.senderID,
+    this.image,
+    String? messageId,
+  }) : messageId =
+            messageId ?? DateTime.now().microsecondsSinceEpoch.toString();
+  @override
+  String toString() {
+    return "message id $messageId text: $text date: $date";
+  }
 }
