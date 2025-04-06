@@ -125,7 +125,7 @@ class _ChatTileState extends State<ChatTile> {
                     widget.message.date,
                     style: TextStyle(
                         fontSize: 12,
-                        color: widget.message.senderID == 1
+                        color: widget.message.senderID == widget.nickname
                             ? Colors.grey[200]
                             : Colors.grey[700]),
                   ),

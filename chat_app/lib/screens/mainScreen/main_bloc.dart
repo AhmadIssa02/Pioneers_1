@@ -1,17 +1,8 @@
 import 'package:chat_app/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 
 class MainBloc {
-  // List<ChatRoom> chatList = [];
-  String getCurrentDateTime() {
-    final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('hh:mm aa');
-    final String formatted = formatter.format(now);
-    return formatted;
-  }
-
-  static List<ChatRoom> chatRooms = [];
+  List<ChatRoom> chatRooms = [];
 
   fillList(QuerySnapshot<Object?> snapshot) {
     chatRooms = snapshot.docs.map((doc) => _mapToChatRoom(doc)).toList();
@@ -19,6 +10,7 @@ class MainBloc {
 
   ChatRoom _mapToChatRoom(QueryDocumentSnapshot<Object?> doc) {
     final data = doc.data() as Map<String, dynamic>;
+
     final chatConv = _mapToRoomDetailsList(data['List'] as List<dynamic>?);
 
     return ChatRoom(

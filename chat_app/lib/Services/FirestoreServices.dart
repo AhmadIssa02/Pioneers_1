@@ -13,57 +13,35 @@ class FirestoreService {
         .snapshots();
   }
 
-  static CollectionReference chats =
-      FirebaseFirestore.instance.collection(collectionName);
+  Future<void> add(ChatRoom chat) {
+    CollectionReference chats =
+        FirebaseFirestore.instance.collection(collectionName);
 
-  // Future<void> add(ChatRoom chat) {
-  //   return chats
-  //       .doc(chat.name)
-  //       .update({
-  //         'image': chat.image,
-  //         'List': chat.chatConv,
-  //       })
-  //       .then((value) => print("User added successfully!"))
-  //       .catchError((error) => print("Failed to add user: $error"));
-  // }
+    return chats
+        .doc(chat.name)
+        .update({
+          'image': chat.image,
+          'List': chat.chatConv,
+        })
+        .then((value) => print("User added successfully!"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
 
-  // Future<void> fetchRoom() {
-  //   return chats.get().then((QuerySnapshot snapshot) {
-  //     snapshot.docs.forEach((doc) {
-  //       print('${doc.id} => ${doc.data()}');
-  //     });
-  //   }).catchError((error) => print("Failed to fetch users: $error"));
-  // }
+  Future<void> fetchRoom() {
+    CollectionReference chats =
+        FirebaseFirestore.instance.collection(collectionName);
 
-  Future<List<RoomDetails>> getMessages(String roomName) async {
-    try {
-      DocumentSnapshot docSnapshot = await chats.doc(roomName).get();
-      if (docSnapshot.exists) {
-        Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
-        List<dynamic> chatList = data['List'] ?? [];
-
-        return chatList.map((chat) {
-          return RoomDetails(
-            date: chat['date'] ?? '',
-            text: chat['text'] ?? '',
-            senderID: chat['senderId'] ?? 0,
-            // image: chat['image'] != null
-            //     ? Uint8List.fromList(List<int>.from(chat['image']))
-            //     : null,
-            messageId: chat['messageId'] ?? "0",
-          );
-        }).toList();
-      } else {
-        print("Chat room not found!");
-        return [];
-      }
-    } catch (error) {
-      print("Failed to fetch messages: $error");
-      return [];
-    }
+    return chats.get().then((QuerySnapshot snapshot) {
+      snapshot.docs.forEach((doc) {
+        print('${doc.id} => ${doc.data()}');
+      });
+    }).catchError((error) => print("Failed to fetch users: $error"));
   }
 
   Future<void> addChatMessage(String roomName, RoomDetails message) {
+    CollectionReference chats =
+        FirebaseFirestore.instance.collection(collectionName);
+
     // TODO: add actual image
     return chats
         .doc(roomName)
@@ -83,6 +61,9 @@ class FirestoreService {
   }
 
   Future<void> deleteChatMessage(String roomName, RoomDetails message) {
+    CollectionReference chats =
+        FirebaseFirestore.instance.collection(collectionName);
+
     // TODO: add actual image
     return chats
         .doc(roomName)
@@ -103,6 +84,9 @@ class FirestoreService {
 
   Future<void> editChatMessage(
       String roomName, RoomDetails oldMessage, RoomDetails newMessage) async {
+    CollectionReference chats =
+        FirebaseFirestore.instance.collection(collectionName);
+
     try {
       DocumentSnapshot docSnapshot = await chats.doc(roomName).get();
       if (docSnapshot.exists) {
@@ -110,7 +94,9 @@ class FirestoreService {
         List<dynamic> chatConv = data['List'];
 
         for (int i = 0; i < chatConv.length; i++) {
+          // print(chatConv[i]);
           if (chatConv[i]['messageId'] == oldMessage.messageId) {
+            print("-------------------/n---------------/n ${chatConv[i]}");
             chatConv[i] = {
               'date': newMessage.date,
               'text': newMessage.text,
@@ -132,6 +118,29 @@ class FirestoreService {
       }
     } catch (error) {
       print("Failed to update message: $error");
+    }
+  }
+
+  Future<String?> getDocumentIdByName(String name) async {
+    try {
+      CollectionReference chats =
+          FirebaseFirestore.instance.collection(collectionName);
+
+      QuerySnapshot querySnapshot =
+          await chats.where('name', isEqualTo: name).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Get the first document's ID (since we assume 'name' is unique)
+        String documentId = querySnapshot.docs.first.id;
+        print('Document ID for room "$name": $documentId');
+        return documentId;
+      } else {
+        print('No document found with the name: $name');
+        return null;
+      }
+    } catch (error) {
+      print('Error fetching document ID: $error');
+      return null;
     }
   }
 }
