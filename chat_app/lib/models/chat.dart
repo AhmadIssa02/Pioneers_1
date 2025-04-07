@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 class ChatRoom {
   final String name;
   final String image;
@@ -18,14 +16,14 @@ class RoomDetails {
   final String date;
   final String text;
   final int senderID;
-  final Uint8List? image;
+  final String chatImage;
   final String messageId;
 
   RoomDetails({
     required this.date,
     required this.text,
     required this.senderID,
-    this.image,
+    required this.chatImage,
     String? messageId,
   }) : messageId =
             messageId ?? DateTime.now().microsecondsSinceEpoch.toString();

@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+
 import '/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -5,6 +10,8 @@ class FirestoreService {
   static const collectionName = "chat_rooms";
   static Stream<QuerySnapshot> chatStream =
       FirebaseFirestore.instance.collection(collectionName).snapshots();
+
+  final FirebaseStorage _storageInstance = FirebaseStorage.instance;
 
   Stream<DocumentSnapshot<Object?>> getDocumentsStream(String docName) {
     return FirebaseFirestore.instance
@@ -23,8 +30,8 @@ class FirestoreService {
           'image': chat.image,
           'List': chat.chatConv,
         })
-        .then((value) => print("User added successfully!"))
-        .catchError((error) => print("Failed to add user: $error"));
+        .then((value) => debugPrint("User added successfully!"))
+        .catchError((error) => debugPrint("Failed to add user: $error"));
   }
 
   Future<void> fetchRoom() {
@@ -32,15 +39,23 @@ class FirestoreService {
         FirebaseFirestore.instance.collection(collectionName);
 
     return chats.get().then((QuerySnapshot snapshot) {
-      snapshot.docs.forEach((doc) {
-        print('${doc.id} => ${doc.data()}');
-      });
-    }).catchError((error) => print("Failed to fetch users: $error"));
+      for (var doc in snapshot.docs) {
+        debugPrint('${doc.id} => ${doc.data()}');
+      }
+    }).catchError((error) {
+      debugPrint("Failed to fetch users: $error");
+      return;
+    });
   }
 
-  Future<void> addChatMessage(String roomName, RoomDetails message) {
+  Future<void> addChatMessage(
+      String roomName, RoomDetails message, File? attachment) async {
     CollectionReference chats =
         FirebaseFirestore.instance.collection(collectionName);
+
+    final imagePath = await _uploadFileToFirebaseStorage(attachment);
+
+    print(imagePath);
 
     // TODO: add actual image
     return chats
@@ -51,13 +66,13 @@ class FirestoreService {
               'date': message.date,
               'text': message.text,
               'senderId': message.senderID,
-              'image': "",
+              'image': imagePath,
               'messageId': message.messageId
             }
           ]),
         })
-        .then((_) => print("Message added successfully!"))
-        .catchError((error) => print("Failed to add message: $error"));
+        .then((_) => debugPrint("Message added successfully!"))
+        .catchError((error) => debugPrint("Failed to add message: $error"));
   }
 
   Future<void> deleteChatMessage(String roomName, RoomDetails message) {
@@ -78,8 +93,8 @@ class FirestoreService {
             }
           ]),
         })
-        .then((_) => print("Message deleted successfully!"))
-        .catchError((error) => print("Failed to delete message: $error"));
+        .then((_) => debugPrint("Message deleted successfully!"))
+        .catchError((error) => debugPrint("Failed to delete message: $error"));
   }
 
   Future<void> editChatMessage(
@@ -94,14 +109,14 @@ class FirestoreService {
         List<dynamic> chatConv = data['List'];
 
         for (int i = 0; i < chatConv.length; i++) {
-          // print(chatConv[i]);
+          // debugPrint(chatConv[i]);
           if (chatConv[i]['messageId'] == oldMessage.messageId) {
-            print("-------------------/n---------------/n ${chatConv[i]}");
+            debugPrint("-------------------/n---------------/n ${chatConv[i]}");
             chatConv[i] = {
               'date': newMessage.date,
               'text': newMessage.text,
               'senderId': newMessage.senderID,
-              'image': newMessage.image ?? "",
+              'image': newMessage.chatImage,
               'messageId': oldMessage.messageId
             };
             break;
@@ -112,12 +127,12 @@ class FirestoreService {
           'List': chatConv,
         });
 
-        print("Message updated successfully!");
+        debugPrint("Message updated successfully!");
       } else {
-        print("Chat room not found!");
+        debugPrint("Chat room not found!");
       }
     } catch (error) {
-      print("Failed to update message: $error");
+      debugPrint("Failed to update message: $error");
     }
   }
 
@@ -132,15 +147,41 @@ class FirestoreService {
       if (querySnapshot.docs.isNotEmpty) {
         // Get the first document's ID (since we assume 'name' is unique)
         String documentId = querySnapshot.docs.first.id;
-        print('Document ID for room "$name": $documentId');
+        debugPrint('Document ID for room "$name": $documentId');
         return documentId;
       } else {
-        print('No document found with the name: $name');
+        debugPrint('No document found with the name: $name');
         return null;
       }
     } catch (error) {
-      print('Error fetching document ID: $error');
+      debugPrint('Error fetching document ID: $error');
       return null;
     }
+  }
+
+  Future<String?> _uploadFileToFirebaseStorage(File? attach) async {
+    if (attach == null) return null;
+
+    final String extension = _getFileExtension(attach.path);
+    final String fileName = _generateFileName(extension);
+
+    try {
+      final ref = _storageInstance.ref('chat_attachment/$fileName');
+      await ref.putFile(attach);
+      return await ref.getDownloadURL();
+    } catch (error) {
+      debugPrint('Error uploading file: $error');
+      return '';
+    }
+  }
+
+  /// Extracts the file extension from a file path.
+  String _getFileExtension(String filePath) {
+    return filePath.split('.').last;
+  }
+
+  /// Generates a unique file name using the current timestamp and file extension.
+  String _generateFileName(String extension) {
+    return '${DateTime.now().toIso8601String()}.$extension';
   }
 }

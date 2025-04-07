@@ -14,7 +14,7 @@ class MainBloc {
     final chatConv = _mapToRoomDetailsList(data['List'] as List<dynamic>?);
 
     return ChatRoom(
-      name: doc.id ?? 'Unnamed Room',
+      name: doc.id,
       image: data['image'] ?? '',
       chatConv: chatConv,
     );
@@ -28,13 +28,14 @@ class MainBloc {
 
   RoomDetails _mapToRoomDetails(Map<String, dynamic> chat) {
     return RoomDetails(
-      date: chat['date'] ?? '',
-      text: chat['text'] ?? '',
-      senderID: chat['senderId'] ?? 0,
-      messageId: chat['messageId'] ?? "0",
-      // image: chat['image'] != null
-      //   ? Uint8List.fromList(List<int>.from(chat['image']))
-      //   : null,
-    );
+        date: chat['date'] ?? '',
+        text: chat['text'] ?? '',
+        senderID: chat['senderId'] ?? 0,
+        messageId: chat['messageId'] ?? "0",
+        chatImage: chat["image"] ?? ""
+        // image: chat['image'] != null
+        //   ? Uint8List.fromList(List<int>.from(chat['image']))
+        //   : null,
+        );
   }
 }

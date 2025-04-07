@@ -1,14 +1,13 @@
-import 'package:chat_app/Services/FirestoreServices.dart';
 import 'package:chat_app/models/chat.dart';
 import 'package:flutter/material.dart';
 
 class ChatTile extends StatefulWidget {
-  Function? onDelete;
-  Function? onUpdate;
+  final Function? onDelete;
+  final Function? onUpdate;
   final int nickname;
   final RoomDetails message;
 
-  ChatTile(
+  const ChatTile(
       {super.key,
       required this.message,
       this.onDelete,
@@ -16,7 +15,7 @@ class ChatTile extends StatefulWidget {
       required this.nickname});
 
   @override
-  _ChatTileState createState() => _ChatTileState();
+  State<ChatTile> createState() => _ChatTileState();
 }
 
 class _ChatTileState extends State<ChatTile> {
@@ -40,14 +39,14 @@ class _ChatTileState extends State<ChatTile> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Deletion'),
-          content: Text('Are you sure you want to delete this message?'),
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this message?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -55,7 +54,7 @@ class _ChatTileState extends State<ChatTile> {
                 print('Message deleted');
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Delete'),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -72,20 +71,21 @@ class _ChatTileState extends State<ChatTile> {
 
   @override
   Widget build(BuildContext context) {
+    print("widget.message.image ${widget.message.chatImage}");
     return Align(
       alignment: widget.message.senderID == widget.nickname
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: widget.message.senderID == widget.nickname
               ? Colors.blueGrey[400]
               : Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Container(
+        child: SizedBox(
           width: 300,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -93,16 +93,15 @@ class _ChatTileState extends State<ChatTile> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.message.image != null &&
-                      widget.message.image!.isNotEmpty)
-                    Image.memory(
-                      widget.message.image!,
+                  if (widget.message.chatImage.isNotEmpty)
+                    Image.network(
+                      widget.message.chatImage,
                       fit: BoxFit.cover,
                       height: 150,
                       width: 150,
                     ),
                   isEditing
-                      ? Container(
+                      ? SizedBox(
                           width: 200, // Set width if needed
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,

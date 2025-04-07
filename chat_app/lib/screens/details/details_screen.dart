@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:chat_app/Services/FirestoreServices.dart';
 import 'package:chat_app/screens/details/details_bloc.dart';
@@ -5,7 +6,6 @@ import 'package:chat_app/screens/details/widgets/chat_tile.dart';
 import 'package:chat_app/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class DetailsScreen extends StatefulWidget {
   final ChatRoom details;
@@ -20,8 +20,6 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isDark = false;
-  bool _flag = true;
 
   final _bloc = DetailsBloc();
 
@@ -41,16 +39,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  void _onSubmit(int senderID) async {
+  void _onSubmit(int senderID, File? attachment) async {
     if (_controller.text.trim().isNotEmpty) {
       FirestoreService().addChatMessage(
-          widget.details.name,
-          RoomDetails(
-            date: DetailsBloc().getCurrentDateTime(),
-            text: _controller.text,
-            senderID: senderID,
-            // image: imageBytes,
-          ));
+        widget.details.name,
+        RoomDetails(
+          date: DetailsBloc().getCurrentDateTime(),
+          text: _controller.text,
+          senderID: senderID,
+          chatImage: "",
+        ),
+        attachment,
+      );
       // widget.onUpdate();
       _controller.clear();
       // imageBytes = null;
@@ -117,7 +117,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     FirestoreService().getDocumentsStream(widget.details.name),
                 builder: (BuildContext context,
                     AsyncSnapshot<DocumentSnapshot> snapshot) {
-                  print("abbbs 123123");
                   if (snapshot.hasError) return Text('${snapshot.error}');
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
@@ -142,19 +141,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       onUpdate:
                                           (String oldtext, String newtext) {
                                         RoomDetails oldMessage = RoomDetails(
-                                            date: widget
-                                                .details.chatConv[index].date,
-                                            text: oldtext,
-                                            senderID: 1,
-                                            messageId: widget.details
-                                                .chatConv[index].messageId);
+                                          date: widget
+                                              .details.chatConv[index].date,
+                                          text: oldtext,
+                                          senderID: 1,
+                                          messageId: widget.details
+                                              .chatConv[index].messageId,
+                                          chatImage: "",
+                                        );
                                         RoomDetails newMessage = RoomDetails(
-                                            date: DetailsBloc()
-                                                .getCurrentDateTime(),
-                                            text: newtext,
-                                            senderID: 1,
-                                            messageId: widget.details
-                                                .chatConv[index].messageId);
+                                          date: DetailsBloc()
+                                              .getCurrentDateTime(),
+                                          text: newtext,
+                                          senderID: 1,
+                                          messageId: widget.details
+                                              .chatConv[index].messageId,
+                                          chatImage: "",
+                                        );
                                         _onUpdate(oldMessage, newMessage);
                                       },
                                       nickname: widget.nickname,
@@ -168,10 +171,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: StreamBuilder<Uint8List?>(
                                   stream: _bloc.imageBytesStream.stream,
-                                  builder: (context, snapshot) {
+                                  builder: (context, imageBytesSnapshot) {
                                     return Row(
                                       children: [
-                                        if (snapshot.data !=
+                                        if (imageBytesSnapshot.data !=
                                             null) // image preview
                                           Padding(
                                             padding: const EdgeInsets.only(
@@ -184,7 +187,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               child: Stack(
                                                 children: [
                                                   Image.memory(
-                                                    snapshot.data!,
+                                                    imageBytesSnapshot.data!,
                                                     width: 40,
                                                     height: 40,
                                                     fit: BoxFit.cover,
@@ -197,8 +200,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                         Expanded(
                                           child: TextField(
-                                            onSubmitted: (value) =>
-                                                _onSubmit(widget.nickname),
+                                            onSubmitted: (value) async {
+                                              final file = await _bloc
+                                                  .convertUInt8ListToFile(
+                                                      imageBytesSnapshot.data!);
+                                              _onSubmit(widget.nickname, file);
+                                            },
                                             controller: _controller,
                                             decoration: InputDecoration(
                                                 hintText: "Type a message...",
@@ -214,8 +221,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                         ),
                                         IconButton(
-                                          onPressed: () =>
-                                              _onSubmit(widget.nickname),
+                                          onPressed: () async {
+                                            print("111111");
+                                            final file = await _bloc
+                                                .convertUInt8ListToFile(
+                                                    imageBytesSnapshot.data);
+                                            print("2222222");
+
+                                            _onSubmit(widget.nickname, file);
+                                            print("3333333");
+                                          },
                                           icon: const Icon(Icons.send),
                                         ),
                                       ],
@@ -249,6 +264,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       text: chat['text'] ?? '',
       senderID: chat['senderId'] ?? 0,
       messageId: chat['messageId'] ?? "0",
+      chatImage: chat['image'] ?? '',
 
       // image: chat['image'] != null
       //   ? Uint8List.fromList(List<int>.from(chat['image']))
