@@ -144,7 +144,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           date: widget
                                               .details.chatConv[index].date,
                                           text: oldtext,
-                                          senderID: 1,
+                                          senderID: widget
+                                              .details.chatConv[index].senderID,
                                           messageId: widget.details
                                               .chatConv[index].messageId,
                                           chatImage: "",
@@ -153,7 +154,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           date: DetailsBloc()
                                               .getCurrentDateTime(),
                                           text: newtext,
-                                          senderID: 1,
+                                          senderID: widget
+                                              .details.chatConv[index].senderID,
                                           messageId: widget.details
                                               .chatConv[index].messageId,
                                           chatImage: "",
@@ -174,8 +176,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   builder: (context, imageBytesSnapshot) {
                                     return Row(
                                       children: [
-                                        if (imageBytesSnapshot.data !=
-                                            null) // image preview
+                                        if (imageBytesSnapshot.data != null)
                                           Padding(
                                             padding: const EdgeInsets.only(
                                                 right: 8.0),
@@ -203,7 +204,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             onSubmitted: (value) async {
                                               final file = await _bloc
                                                   .convertUInt8ListToFile(
-                                                      imageBytesSnapshot.data!);
+                                                      imageBytesSnapshot.data);
                                               _onSubmit(widget.nickname, file);
                                             },
                                             controller: _controller,
@@ -222,14 +223,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
-                                            print("111111");
                                             final file = await _bloc
                                                 .convertUInt8ListToFile(
                                                     imageBytesSnapshot.data);
-                                            print("2222222");
 
                                             _onSubmit(widget.nickname, file);
-                                            print("3333333");
                                           },
                                           icon: const Icon(Icons.send),
                                         ),

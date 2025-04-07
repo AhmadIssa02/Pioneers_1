@@ -51,7 +51,7 @@ class _ChatTileState extends State<ChatTile> {
             TextButton(
               onPressed: () {
                 widget.onDelete!();
-                print('Message deleted');
+                debugPrint('Message deleted');
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text('Delete'),
@@ -71,7 +71,7 @@ class _ChatTileState extends State<ChatTile> {
 
   @override
   Widget build(BuildContext context) {
-    print("widget.message.image ${widget.message.chatImage}");
+    debugPrint("widget.message.image ${widget.message.chatImage}");
     return Align(
       alignment: widget.message.senderID == widget.nickname
           ? Alignment.centerRight
@@ -108,7 +108,7 @@ class _ChatTileState extends State<ChatTile> {
                             child: TextField(
                               controller: _controller,
                               maxLines: null,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 hintText: "Edit message",
                                 border: OutlineInputBorder(),
                               ),
@@ -117,9 +117,10 @@ class _ChatTileState extends State<ChatTile> {
                         )
                       : Text(
                           widget.message.text,
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black),
                         ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Text(
                     widget.message.date,
                     style: TextStyle(
@@ -130,7 +131,7 @@ class _ChatTileState extends State<ChatTile> {
                   ),
                 ],
               ),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
               widget.message.senderID == widget.nickname
                   ? InkWell(
                       onTap: () {
@@ -138,7 +139,7 @@ class _ChatTileState extends State<ChatTile> {
                           isEditing = !isEditing; // Toggle the editing state
                         });
                       },
-                      child: Icon(Icons.edit),
+                      child: const Icon(Icons.edit),
                     )
                   : Container(),
               const SizedBox(
@@ -147,7 +148,7 @@ class _ChatTileState extends State<ChatTile> {
               if (isEditing)
                 InkWell(
                   onTap: _handleUpdate,
-                  child: Icon(Icons.check),
+                  child: const Icon(Icons.check),
                 ),
               const SizedBox(
                 width: 6,
@@ -157,7 +158,7 @@ class _ChatTileState extends State<ChatTile> {
                       onTap: () {
                         _showDeleteConfirmationDialog(context);
                       },
-                      child: Icon(Icons.delete),
+                      child: const Icon(Icons.delete),
                     )
                   : Container(),
             ],

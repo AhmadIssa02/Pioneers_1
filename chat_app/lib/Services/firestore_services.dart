@@ -55,9 +55,8 @@ class FirestoreService {
 
     final imagePath = await _uploadFileToFirebaseStorage(attachment);
 
-    print(imagePath);
+    debugPrint(imagePath);
 
-    // TODO: add actual image
     return chats
         .doc(roomName)
         .update({
@@ -79,7 +78,6 @@ class FirestoreService {
     CollectionReference chats =
         FirebaseFirestore.instance.collection(collectionName);
 
-    // TODO: add actual image
     return chats
         .doc(roomName)
         .update({
