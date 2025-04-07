@@ -66,7 +66,6 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
           child: ListView.builder(
               itemCount: widget.itemsList.length,
               itemBuilder: (ctx, index) {
-                //TODO SETSTATE HERE WILL CREATE AN ERROR
                 return Container(
                   color: Colors.white38,
                   child: Row(
@@ -81,7 +80,6 @@ class _ReceiptBottomSheetState extends State<ReceiptBottomSheet> {
                           width: MediaQuery.of(context).size.width / 5,
                           child: Text("${widget.itemsList[index].price}")),
                       Expanded(child: SizedBox()),
-                      //TODO + - (and at 0 delete ) use callback
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 5,
                         child: Row(

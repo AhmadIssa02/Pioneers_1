@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../main_screen.dart';
 
-
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -14,7 +13,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showPassword = false;
   String error = "";
   TextEditingController username = TextEditingController(text: "test");
-  //TODO: REMOVE THIS
   TextEditingController password = TextEditingController(text: "pass");
   //HI
   @override

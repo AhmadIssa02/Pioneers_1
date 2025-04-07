@@ -25,7 +25,6 @@ class DetailsBloc {
 
   Future<File?> convertUInt8ListToFile(Uint8List? image) async {
     if (image == null) {
-      print("nullllll");
       return null;
     }
     final tempDir = await getTemporaryDirectory();

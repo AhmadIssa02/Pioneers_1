@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:chat_app/Services/FirestoreServices.dart';
+import 'package:chat_app/Services/firestore_services.dart';
 import 'package:chat_app/screens/details/details_bloc.dart';
 import 'package:chat_app/screens/details/widgets/chat_tile.dart';
 import 'package:chat_app/models/chat.dart';
@@ -20,6 +20,7 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool isImageSent = true;
 
   final _bloc = DetailsBloc();
 
@@ -176,7 +177,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   builder: (context, imageBytesSnapshot) {
                                     return Row(
                                       children: [
-                                        if (imageBytesSnapshot.data != null)
+                                        if (imageBytesSnapshot.data != null &&
+                                            !isImageSent)
                                           Padding(
                                             padding: const EdgeInsets.only(
                                                 right: 8.0),
@@ -202,6 +204,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         Expanded(
                                           child: TextField(
                                             onSubmitted: (value) async {
+                                              isImageSent = true;
                                               final file = await _bloc
                                                   .convertUInt8ListToFile(
                                                       imageBytesSnapshot.data);
@@ -213,6 +216,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 suffixIcon: IconButton(
                                                   onPressed: () {
                                                     _bloc.getImage();
+                                                    isImageSent = false;
                                                     // _pickImage();
                                                   },
                                                   icon: const Icon(
@@ -223,6 +227,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
+                                            isImageSent = true;
                                             final file = await _bloc
                                                 .convertUInt8ListToFile(
                                                     imageBytesSnapshot.data);

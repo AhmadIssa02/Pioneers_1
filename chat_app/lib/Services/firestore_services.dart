@@ -65,7 +65,7 @@ class FirestoreService {
               'date': message.date,
               'text': message.text,
               'senderId': message.senderID,
-              'image': imagePath,
+              'image': imagePath ?? "",
               'messageId': message.messageId
             }
           ]),
@@ -86,7 +86,7 @@ class FirestoreService {
               'date': message.date,
               'text': message.text,
               'senderId': message.senderID,
-              'image': "",
+              'image': message.chatImage,
               'messageId': message.messageId
             }
           ]),

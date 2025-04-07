@@ -10,6 +10,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(left: 20, right: 20),

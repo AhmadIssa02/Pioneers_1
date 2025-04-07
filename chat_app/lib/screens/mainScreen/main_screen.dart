@@ -1,4 +1,4 @@
-import 'package:chat_app/Services/FirestoreServices.dart';
+import 'package:chat_app/Services/firestore_services.dart';
 import 'package:chat_app/screens/mainScreen/main_bloc.dart';
 import 'package:chat_app/screens/mainScreen/widgets/custom_appbar.dart';
 import 'package:chat_app/screens/mainScreen/widgets/custom_listview.dart';
